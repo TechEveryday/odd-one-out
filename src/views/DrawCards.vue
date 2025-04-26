@@ -18,7 +18,7 @@ function drawCards() {
   store.evaluateResults()
 }
 </script>
-
+<!-- TODO: display player names, and their card that was drawn -->
 <template>
   <div class="about">
     <div>
