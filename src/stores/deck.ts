@@ -90,6 +90,28 @@ export const useDeckStore = defineStore('deck', () => {
       }
     }
 
+    // if only 1 player does not have a jack, queen, king, ace, they drink
+    const hasNoFaceCard = players.value.filter(({ card }) => {
+      if (card) {
+        const value = parseInt(card.value)
+        return (
+          value < 11 ||
+          (card.value !== 'Jack' &&
+            card.value !== 'Queen' &&
+            card.value !== 'King' &&
+            card.value !== 'Ace')
+        )
+      }
+      return false
+    })
+    const hasNoFaceCardCount = hasNoFaceCard.length
+    if (hasNoFaceCardCount === 1) {
+      const player = hasNoFaceCard[0]
+      if (player) {
+        results.value.push(`Only no face card - drink ${player.name}`)
+      }
+    }
+
     // if only 1 player has an ace, they drink
     const hasAce = players.value.find(({ card }) => card?.value === 'Ace')?.card
     const hasAceCount = players.value.filter(({ card }) => card?.value === 'Ace').length

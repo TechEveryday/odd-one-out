@@ -13,6 +13,9 @@ import { Button } from 'primevue'
       <p>If only 1 player has a card higher than 8 inclusive, drink</p>
       <p>If only 1 player has a card lower than 8, drink</p>
       <p>If only 1 player has a suit that is different than the rest, drink</p>
+      <!-- TODO: Two ways to play,
+       automatic and have the app figure it out
+       manual and just have the cards drawn but players call out IRL -->
       <Button @click="() => $router.push('/player-count')" label="Play!"></Button>
     </div>
   </div>

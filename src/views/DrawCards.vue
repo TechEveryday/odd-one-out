@@ -1,22 +1,19 @@
 <script setup lang="ts">
 import { useDeckStore } from '@/stores/deck'
-
 import { Button } from 'primevue'
 
 const store = useDeckStore()
 
-const drawCards = () => {
+function drawCards() {
   console.log('Drawing cards...')
   store.results = []
   for (let i = 0; i < store.amountOfPlayers; i++) {
     store.drawCard()
     store.updatePlayerTurn()
   }
-  // console.log('Cards drawn:', store.players)
   store.players.forEach((player) => {
     console.log(`Card for ${player.name}`, player.card)
   })
-  // console.log('players', store.players)
 
   store.evaluateResults()
 }
@@ -25,7 +22,7 @@ const drawCards = () => {
 <template>
   <div class="about">
     <div>
-      <Button @click="drawCards()" label="Draw"></Button>
+      <Button @click="drawCards" label="Draw"></Button>
       <div>Results:</div>
       <!-- for each string in results display it -->
       <div v-for="(result, index) in store.results" :key="index">
