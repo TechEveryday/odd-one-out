@@ -20,6 +20,7 @@ export const useDeckStore = defineStore('deck', () => {
   const players = ref([] as Player[])
   const playerTurn = ref(0)
   const results = ref([] as string[])
+  const firstDraw = ref(true)
 
   for (let i = 0; i < amountOfPlayers.value; i++) {
     players.value.push({ name: '', card: null })
@@ -41,8 +42,14 @@ export const useDeckStore = defineStore('deck', () => {
 
   function drawCard() {
     if (deck.value.length === 0) {
+      if (!firstDraw.value) {
+        results.value.push('Deck empty, community drink')
+      }
       console.log('not enough cards, reshuffling')
       makeDeck()
+      if (firstDraw.value) {
+        firstDraw.value = false
+      }
     }
     const randomIndex = Math.floor(Math.random() * deck.value.length)
     const drawnCard = deck.value[randomIndex]
