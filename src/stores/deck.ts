@@ -70,6 +70,32 @@ export const useDeckStore = defineStore('deck', () => {
     players.value.push({ name: '', card: null })
   }
 
+  /**
+   * Makes the roster exactly `amountOfPlayers` long, growing or shrinking as needed.
+   *
+   * Callers used to only ever push, so lowering the count left the surplus players in
+   * the array. They were never rendered but were still counted by every check that
+   * walks `players`, which silently disabled the Ready button and fed cardless entries
+   * to the scoring rules.
+   */
+  function syncPlayersToCount() {
+    const target = amountOfPlayers.value
+
+    if (players.value.length > target) {
+      players.value = players.value.slice(0, target)
+    } else {
+      while (players.value.length < target) {
+        players.value.push({ name: '', card: null })
+      }
+    }
+
+    // updatePlayerTurn takes the modulus of the old length, so a turn left pointing
+    // past the end of a shrunken roster would make the next draw write to undefined.
+    if (playerTurn.value >= players.value.length) {
+      playerTurn.value = 0
+    }
+  }
+
   function updatePlayerTurn() {
     playerTurn.value = (playerTurn.value + 1) % players.value.length
   }
@@ -250,10 +276,12 @@ export const useDeckStore = defineStore('deck', () => {
     deck,
     amountOfPlayers,
     players,
+    playerTurn,
     results,
     makeDeck,
     drawCard,
     addPlayer,
+    syncPlayersToCount,
     updatePlayerTurn,
     evaluateResults,
   }

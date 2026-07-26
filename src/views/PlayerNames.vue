@@ -3,11 +3,8 @@ import { useDeckStore } from '@/stores/deck'
 import { Button, InputText } from 'primevue'
 
 const store = useDeckStore()
-const playersToAdd = store.amountOfPlayers - store.players.length
 
-for (let i = 0; i < playersToAdd; i++) {
-  store.players.push({ name: '', card: null })
-}
+store.syncPlayersToCount()
 </script>
 
 <template>
