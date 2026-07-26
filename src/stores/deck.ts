@@ -189,10 +189,26 @@ export const useDeckStore = defineStore('deck', () => {
       }
     }
 
+    /* Did the whole table match?
+     *
+     * `everyoneDrew` is the guard that was missing. `card?.suit` is undefined for a
+     * player who has not drawn, and `undefined === undefined` is true, so on a table
+     * where nobody held a card every() passed and both all-same rules fired against an
+     * empty table.
+     *
+     * Computed here, ahead of the two "same ..." blocks, because those name every
+     * matching player — which is the entire table when the all-same rule also applies,
+     * so the pair reads as the same outcome announced twice.
+     */
+    const drawn = players.value.map(({ card }) => card).filter((card): card is Card => !!card)
+    const everyoneDrew = drawn.length > 0 && drawn.length === players.value.length
+    const allSameSuit = everyoneDrew && drawn.every(({ suit }) => suit === drawn[0].suit)
+    const allSameValue = everyoneDrew && drawn.every(({ value }) => value === drawn[0].value)
+
     // if any players have the same card value, they drink
     const cardValues = players.value.map(({ card }) => card?.value)
     const uniqueCardValues = [...new Set(cardValues)]
-    if (uniqueCardValues.length < cardValues.length) {
+    if (!allSameValue && uniqueCardValues.length < cardValues.length) {
       const cardValueCounts = uniqueCardValues.map((value) => ({
         value,
         count: cardValues.filter((v) => v === value).length,
@@ -212,7 +228,7 @@ export const useDeckStore = defineStore('deck', () => {
     // if any players have the same suit, they drink
     const cardSuits = players.value.map(({ card }) => card?.suit)
     const uniqueCardSuits = [...new Set(cardSuits)]
-    if (uniqueCardSuits.length < cardSuits.length) {
+    if (!allSameSuit && uniqueCardSuits.length < cardSuits.length) {
       const cardSuitCounts = uniqueCardSuits.map((suit) => ({
         suit,
         count: cardSuits.filter((s) => s === suit).length,
@@ -229,18 +245,12 @@ export const useDeckStore = defineStore('deck', () => {
       }
     }
 
-    // if there are only 4 players and everyone has the same suit, shot
-    const allSameSuit = players.value.every(
-      ({ card }) => card?.suit === players.value[0].card?.suit,
-    )
+    // everyone has the same suit
     if (allSameSuit) {
       results.value.push('All same suit - drink')
     }
 
-    // if there are only only 4 players and everyone has the same value, shot
-    const allSameValue = players.value.every(
-      ({ card }) => card?.value === players.value[0].card?.value,
-    )
+    // everyone has the same value
     if (allSameValue) {
       results.value.push('All same value - shot')
     }
