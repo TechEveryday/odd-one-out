@@ -1,41 +1,48 @@
 <script setup lang="ts">
-import { Button } from 'primevue'
+import { useRouter } from 'vue-router'
+import { useDeckStore } from '@/stores/deck'
+
+const router = useRouter()
+const store = useDeckStore()
+
+/* A restored session lands here, so offer to resume it rather than making the group
+ * re-enter every name. Names are the marker: a fresh table has all of them blank. */
+const hasGameInProgress = () =>
+  store.players.length > 0 && store.players.every((player) => player.name !== '')
+
+async function startNewGame() {
+  await store.resetGame()
+  router.push('/player-count')
+}
 </script>
+
 <template>
-  <div class="about">
-    <div>
-      <h1 class="game-title">Odd One Out</h1>
-      <h2>Rules</h2>
-      <p>If joker is drawn, shot</p>
-      <p>If only 1 player has a face card, drink</p>
-      <p>If only 1 player has an ace, drink</p>
-      <p>If only 1 player has a card higher than 8 inclusive, drink</p>
-      <p>If only 1 player has a card lower than 8, drink</p>
-      <p>If only 1 player has a suit that is different than the rest, drink</p>
-      <!-- TODO: Two ways to play,
-       automatic and have the app figure it out
-       manual and just have the cards drawn but players call out IRL -->
-      <Button @click="() => $router.push('/player-count')" label="Play!"></Button>
+  <div class="screen">
+    <div class="screen__body">
+      <h1 class="title">Odd One Out</h1>
+      <p class="subtitle">A card game for 3 to 8 players.</p>
+
+      <p class="section-label">Rules</p>
+      <ul class="rules">
+        <li>If a joker is drawn, shot</li>
+        <li>If only 1 player has a face card, drink</li>
+        <li>If only 1 player has an ace, drink</li>
+        <li>If only 1 player has a card 8 or higher, drink</li>
+        <li>If only 1 player has a card lower than 8, drink</li>
+        <li>If only 1 player has a suit different from the rest, drink</li>
+      </ul>
+    </div>
+
+    <!-- TODO: Two ways to play,
+     automatic and have the app figure it out
+     manual and just have the cards drawn but players call out IRL -->
+    <div class="screen__actions">
+      <button v-if="hasGameInProgress()" class="btn" @click="router.push('/draw')">
+        Resume game
+      </button>
+      <button class="btn" :class="{ 'btn--ghost': hasGameInProgress() }" @click="startNewGame">
+        New game
+      </button>
     </div>
   </div>
 </template>
-
-<style>
-.game-title {
-  font-weight: 500;
-  font-size: 2.6rem;
-  text-align: center;
-}
-
-@media (min-width: 1024px) {
-  .game-title {
-    text-align: left;
-  }
-
-  .about {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-  }
-}
-</style>

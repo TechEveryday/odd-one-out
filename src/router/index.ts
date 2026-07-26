@@ -1,8 +1,12 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import MainView from '@/views/MainView.vue'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  /* Hash history, not web history. Capacitor serves the bundle from a local origin with
+   * no server-side rewrite, so a path like /draw has nothing to fall back to index.html
+   * on reload or on a restored deep link. The hash never leaves the document, so it
+   * resolves identically in the web view and in a browser. */
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',

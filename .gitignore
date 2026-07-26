@@ -28,3 +28,10 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+# Capacitor native projects. `ios/` and `android/` ARE committed once scaffolded — they
+# hold signing config and native tweaks — but everything generated inside them is
+# covered by the ios/.gitignore and android/.gitignore that Capacitor ships, so those
+# paths are deliberately not repeated here. Adding them again is what let the copied
+# web assets and android/local.properties get committed in the first place.
+.capacitor/

@@ -1,5 +1,6 @@
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { defineStore } from 'pinia'
+import { clearState, loadState, saveState } from './persistence'
 
 export type Deck = {
   cards: Card[]
@@ -22,8 +23,58 @@ export const useDeckStore = defineStore('deck', () => {
   const results = ref([] as string[])
   const firstDraw = ref(true)
 
+  /* Gates persistence. iOS kills backgrounded web views routinely, so the game has to
+   * survive being closed mid-round. Without this flag the empty seed state below races
+   * the async load and overwrites a real save on launch. */
+  const hydrated = ref(false)
+
   for (let i = 0; i < amountOfPlayers.value; i++) {
     players.value.push({ name: '', card: null })
+  }
+
+  /** Restores the previous session, if any. Safe to call more than once. */
+  async function hydrate() {
+    if (hydrated.value) return
+
+    const saved = await loadState()
+    if (saved) {
+      amountOfPlayers.value = saved.amountOfPlayers
+      players.value = saved.players
+      deck.value = saved.deck
+      playerTurn.value = saved.playerTurn
+      results.value = saved.results
+      firstDraw.value = saved.firstDraw
+    }
+
+    hydrated.value = true
+
+    // Registered only after the first load resolves, so hydration itself does not
+    // trigger a redundant write back of what was just read.
+    watch(
+      [deck, amountOfPlayers, players, playerTurn, results, firstDraw],
+      () => {
+        void saveState({
+          amountOfPlayers: amountOfPlayers.value,
+          players: players.value,
+          deck: deck.value,
+          playerTurn: playerTurn.value,
+          results: results.value,
+          firstDraw: firstDraw.value,
+        })
+      },
+      { deep: true },
+    )
+  }
+
+  /** Clears the table and the save, returning the store to a first-launch state. */
+  async function resetGame() {
+    deck.value = []
+    playerTurn.value = 0
+    results.value = []
+    firstDraw.value = true
+    amountOfPlayers.value = 3
+    players.value = Array.from({ length: 3 }, () => ({ name: '', card: null }))
+    await clearState()
   }
 
   function makeDeck() {
@@ -302,6 +353,9 @@ export const useDeckStore = defineStore('deck', () => {
     players,
     playerTurn,
     results,
+    hydrated,
+    hydrate,
+    resetGame,
     makeDeck,
     drawCard,
     addPlayer,

@@ -3,7 +3,13 @@
   <head>
     <meta charset="UTF-8">
     <link rel="icon" href="/favicon.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- viewport-fit=cover is what makes env(safe-area-inset-*) resolve to anything
+         other than 0. The shell in main.css depends on it for notch and home-indicator
+         padding; drop it and the layout runs under the hardware. -->
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#101418">
     <title>Odd One Out</title>
   </head>
   <body>
