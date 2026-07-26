@@ -83,18 +83,16 @@ export const useDeckStore = defineStore('deck', () => {
       results.value.push('Joker drawn - shot')
     }
 
-    // if only 1 player has a jack, queen, king, ace then they drink
-    const hasJack = players.value.find(({ card }) => card?.value === 'Jack')?.card
-    const hasQueen = players.value.find(({ card }) => card?.value === 'Queen')?.card
-    const hasKing = players.value.find(({ card }) => card?.value === 'King')?.card
-    const hasFaceCard = [hasJack, hasQueen, hasKing].filter(Boolean).length
-    if (hasFaceCard === 1) {
-      const player = players.value.find(
-        ({ card }) => card?.value === 'Jack' || card?.value === 'Queen' || card?.value === 'King',
-      )
-      if (player) {
-        results.value.push(`Only face card - drink ${player.name}`)
-      }
+    // if only 1 player has a jack, queen, king then they drink
+    //
+    // Count players, not ranks. Probing each rank separately with find() and counting
+    // the truthy results answers "how many distinct face ranks are on the table", so a
+    // table holding two Jacks scored 1 and wrongly fired this rule.
+    const faceCardPlayers = players.value.filter(
+      ({ card }) => card?.value === 'Jack' || card?.value === 'Queen' || card?.value === 'King',
+    )
+    if (faceCardPlayers.length === 1) {
+      results.value.push(`Only face card - drink ${faceCardPlayers[0].name}`)
     }
 
     // if only 1 player does not have a jack, queen, king, ace, they drink
