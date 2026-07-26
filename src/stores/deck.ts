@@ -45,17 +45,33 @@ export const useDeckStore = defineStore('deck', () => {
       if (!firstDraw.value) {
         results.value.push('Deck empty, community drink')
       }
-      console.log('not enough cards, reshuffling')
       makeDeck()
       if (firstDraw.value) {
         firstDraw.value = false
       }
+
+      /* The deck runs dry mid-round, not between rounds — drawCard refills the moment
+       * it empties, part way through dealing to the table. A straight refill puts all
+       * 54 cards back including the ones already face up, so the players still to draw
+       * could be handed a card another player is visibly holding. That is not just
+       * odd to look at: the same-value and same-suit rules then score a pair that
+       * cannot exist in a real deck.
+       *
+       * Cards held from the previous round count too. Nothing on the table should ever
+       * be duplicated in hand, and at most eight cards are withheld from fifty-four. */
+      const inPlay = new Set(
+        players.value
+          .map(({ card }) => card)
+          .filter((card): card is Card => !!card)
+          .map(({ suit, value }) => `${suit}-${value}`),
+      )
+      deck.value = deck.value.filter(({ suit, value }) => !inPlay.has(`${suit}-${value}`))
     }
+
     const randomIndex = Math.floor(Math.random() * deck.value.length)
     const drawnCard = deck.value[randomIndex]
     deck.value.splice(randomIndex, 1)
 
-    players.value[playerTurn.value].card = drawnCard
     players.value = [
       ...players.value.slice(0, playerTurn.value),
       { ...players.value[playerTurn.value], card: drawnCard },
