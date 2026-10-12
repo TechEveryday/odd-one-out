@@ -280,6 +280,33 @@ export const useDeckStore = defineStore('deck', () => {
       }
     }
 
+    /* If only 1 player has a colour that is different from the rest, they drink.
+     *
+     * Not covered by the suit rule above: Hearts, Diamonds, Spades is three different
+     * suits, so that rule stays quiet, yet Spades is plainly the odd one out on colour.
+     *
+     * Jokers have no colour and are left out of the count. The other colour has to be
+     * held by at least two players, otherwise one red against one black (say, beside a
+     * Joker) would name both of them as the odd one out.
+     */
+    const colourOf = (suit: string) =>
+      suit === 'Hearts' || suit === 'Diamonds'
+        ? 'red'
+        : suit === 'Clubs' || suit === 'Spades'
+          ? 'black'
+          : null
+    const redPlayers = players.value.filter(({ card }) => card && colourOf(card.suit) === 'red')
+    const blackPlayers = players.value.filter(({ card }) => card && colourOf(card.suit) === 'black')
+    const oddColourPlayer =
+      redPlayers.length === 1 && blackPlayers.length >= 2
+        ? redPlayers[0]
+        : blackPlayers.length === 1 && redPlayers.length >= 2
+          ? blackPlayers[0]
+          : undefined
+    if (oddColourPlayer) {
+      results.value.push(`Only different colour - drink ${oddColourPlayer.name}`)
+    }
+
     /* Did the whole table match?
      *
      * `everyoneDrew` is the guard that was missing. `card?.suit` is undefined for a
