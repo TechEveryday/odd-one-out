@@ -51,5 +51,10 @@
     "vite-plugin-vue-devtools": "^7.7.2",
     "vitest": "^4.1.11",
     "vue-tsc": "^2.2.8"
+  },
+  "overrides": {
+    "editorconfig": {
+      "minimatch": "^9.0.7"
+    }
   }
 }
