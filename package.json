@@ -55,6 +55,9 @@
   "overrides": {
     "editorconfig": {
       "minimatch": "^9.0.7"
+    },
+    "xcode": {
+      "uuid": "^11.1.1"
     }
   }
 }
